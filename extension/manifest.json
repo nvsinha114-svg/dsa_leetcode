@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "LeetSync Pro - LeetCode to GitHub Auto Sync",
+  "version": "1.0.0",
+  "description": "Automatically categorizes and commits accepted LeetCode Java solutions directly to your GitHub repository.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "*://leetcode.com/*",
+    "*://api.github.com/*"
+  ],
+  "background": {
+    "service_worker": "scripts/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://leetcode.com/problems/*"
+      ],
+      "js": [
+        "scripts/categorizer.js",
+        "scripts/formatter.js",
+        "scripts/content.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "scripts/interceptor.js"
+      ],
+      "matches": [
+        "*://leetcode.com/*"
+      ]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

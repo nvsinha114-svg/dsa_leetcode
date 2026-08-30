@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetSync Pro Settings</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h1>LeetSync Pro</h1>
+          <p>LeetCode &rarr; GitHub Auto Sync</p>
+        </div>
+      </div>
+      <div id="connectionBadge" class="badge badge-disconnected">Not Connected</div>
+    </header>
+
+    <!-- Main Settings Form -->
+    <div class="card">
+      <h2 class="card-title">GitHub Configuration</h2>
+      
+      <div class="form-group">
+        <label for="githubToken">Personal Access Token (PAT) <span class="required">*</span></label>
+        <div class="input-password-wrapper">
+          <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
+          <button type="button" id="toggleTokenBtn" class="btn-icon" title="Toggle visibility">👁️</button>
+        </div>
+        <small class="helper-text">
+          Needs <code>repo</code> scope (or fine-grained <i>Contents: Read & Write</i>). Tokens remain local to your browser.
+        </small>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="repoOwner">Owner / User <span class="required">*</span></label>
+          <input type="text" id="repoOwner" value="nvsinha114-svg" placeholder="nvsinha114-svg" />
+        </div>
+        <div class="form-group flex-1">
+          <label for="repoName">Repository <span class="required">*</span></label>
+          <input type="text" id="repoName" value="dsa_leetcode" placeholder="dsa_leetcode" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="branch">Target Branch</label>
+          <input type="text" id="branch" value="main" placeholder="main" />
+        </div>
+        <div class="form-group flex-1 checkbox-group">
+          <label class="checkbox-label" for="autoSync">
+            <input type="checkbox" id="autoSync" checked />
+            <span>Enable Auto-Sync</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button id="saveBtn" class="btn btn-primary">Save Settings</button>
+        <button id="testBtn" class="btn btn-secondary">Test Connection</button>
+      </div>
+
+      <div id="statusMessage" class="status-box hidden"></div>
+    </div>
+
+    <!-- Category Mapping Summary -->
+    <div class="card">
+      <h2 class="card-title">Auto-Routing Folders (17 Categories)</h2>
+      <div class="category-tags">
+        <span class="tag">Arrays</span>
+        <span class="tag">Strings</span>
+        <span class="tag">Hashing</span>
+        <span class="tag">TwoPointers</span>
+        <span class="tag">SlidingWindow</span>
+        <span class="tag">PrefixSum</span>
+        <span class="tag">BinarySearch</span>
+        <span class="tag">LinkedList</span>
+        <span class="tag">Stack</span>
+        <span class="tag">Queue</span>
+        <span class="tag">BinaryTree</span>
+        <span class="tag">BST</span>
+        <span class="tag">Heap</span>
+        <span class="tag">Greedy</span>
+        <span class="tag">Backtracking</span>
+        <span class="tag">Graph</span>
+        <span class="tag">DynamicProgramming</span>
+      </div>
+    </div>
+
+    <!-- Recent Sync History -->
+    <div class="card">
+      <div class="history-header">
+        <h2 class="card-title">Recent Sync Activity</h2>
+        <button id="clearHistoryBtn" class="btn-link">Clear</button>
+      </div>
+      <div id="syncHistoryList" class="history-list">
+        <div class="empty-state">No submissions synced yet. Solve a LeetCode problem in Java and hit Submit!</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
