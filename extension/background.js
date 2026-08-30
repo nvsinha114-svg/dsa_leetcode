@@ -15,7 +15,7 @@ const DEFAULT_CONFIG = {
   autoSync: true
 };
 
-// Safe UTF-8 to Base64 encoder for browser environments
+// Safe UTF-8 to Base64 encoder
 function utf8ToBase64(str) {
   const bytes = new TextEncoder().encode(str);
   const binString = Array.from(bytes, (byte) => String.fromCharCode(byte)).join('');
@@ -29,11 +29,17 @@ function base64ToUtf8(base64) {
   return new TextDecoder().decode(bytes);
 }
 
-// Get user configuration from storage
+// Get user configuration from storage with sanitization
 async function getConfig() {
   return new Promise((resolve) => {
     chrome.storage.local.get(DEFAULT_CONFIG, (items) => {
-      resolve(items);
+      resolve({
+        githubToken: (items.githubToken || '').trim(),
+        repoOwner: (items.repoOwner || 'nvsinha114-svg').trim().replace(/^\/+|\/+$/g, ''),
+        repoName: (items.repoName || 'dsa_leetcode').trim().replace(/^\/+|\/+$/g, ''),
+        branch: (items.branch || 'main').trim(),
+        autoSync: items.autoSync !== false
+      });
     });
   });
 }
@@ -47,7 +53,6 @@ async function addSyncRecord(record) {
         ...record,
         timestamp: new Date().toISOString()
       });
-      // Keep last 50 items
       const trimmed = history.slice(0, 50);
       chrome.storage.local.set({ syncHistory: trimmed }, () => {
         resolve();
@@ -57,16 +62,20 @@ async function addSyncRecord(record) {
 }
 
 /**
- * Checks if a file exists on GitHub and returns its SHA and content
+ * Checks if a file exists on GitHub and returns its SHA and decoded content.
+ * HTTP 404 indicates the file does not exist yet (normal/expected for new solutions).
  */
 async function fetchExistingFile(owner, repo, path, branch, token) {
-  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g, '/')}?ref=${branch}`;
+  console.log(`[LeetSync] Checking existing file... (${path})`);
+  const branchParam = branch ? `?ref=${encodeURIComponent(branch)}` : '';
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g, '/')}${branchParam}`;
   
   const response = await fetch(url, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
-      'Accept': 'application/vnd.github.v3+json'
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28'
     }
   });
 
@@ -76,6 +85,7 @@ async function fetchExistingFile(owner, repo, path, branch, token) {
     if (data.content) {
       decodedContent = base64ToUtf8(data.content);
     }
+    console.log(`[LeetSync] File exists on GitHub (SHA: ${data.sha})`);
     return {
       exists: true,
       sha: data.sha,
@@ -84,6 +94,7 @@ async function fetchExistingFile(owner, repo, path, branch, token) {
   }
 
   if (response.status === 404) {
+    console.log(`[LeetSync] File does not exist (404), creating new file...`);
     return {
       exists: false,
       sha: null,
@@ -91,21 +102,34 @@ async function fetchExistingFile(owner, repo, path, branch, token) {
     };
   }
 
+  if (response.status === 401) {
+    throw new Error('Invalid or expired GitHub Personal Access Token (401 Unauthorized). Please check your token in the extension popup.');
+  }
+
+  if (response.status === 403) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(`GitHub permission or rate limit error (403 Forbidden): ${errData.message || 'Check token scopes'}`);
+  }
+
   const errData = await response.json().catch(() => ({}));
-  throw new Error(`GitHub API error checking file: ${response.status} ${errData.message || response.statusText}`);
+  throw new Error(`GitHub API error checking file (${response.status}): ${errData.message || response.statusText}`);
 }
 
 /**
- * Puts file to GitHub repository using REST API
+ * Puts file to GitHub repository using REST API.
  */
 async function commitFileToGitHub(owner, repo, path, branch, token, contentStr, commitMessage, existingSha) {
+  console.log(`[LeetSync] Creating file on GitHub... (${path})`);
   const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g, '/')}`;
   
   const body = {
     message: commitMessage,
-    content: utf8ToBase64(contentStr),
-    branch: branch
+    content: utf8ToBase64(contentStr)
   };
+
+  if (branch) {
+    body.branch = branch;
+  }
 
   if (existingSha) {
     body.sha = existingSha;
@@ -120,15 +144,39 @@ async function commitFileToGitHub(owner, repo, path, branch, token, contentStr, 
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+          'X-GitHub-Api-Version': '2022-11-28'
         },
         body: JSON.stringify(body)
       });
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         const result = await response.json();
+        console.log(`[LeetSync] GitHub file created successfully: ${path}`);
         return result;
+      }
+
+      if (response.status === 401) {
+        throw new Error('Invalid or expired GitHub Personal Access Token (401 Unauthorized).');
+      }
+
+      if (response.status === 403) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(`GitHub permission error (403 Forbidden): ${errData.message || 'Ensure PAT has repo permissions.'}`);
+      }
+
+      if (response.status === 404) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(`GitHub repository '${owner}/${repo}' or branch '${branch}' not found (404 Not Found). Ensure the repository exists and your PAT has repo permissions.`);
+      }
+
+      if (response.status === 409) {
+        console.warn('[LeetSync] Conflict (409) committing file, refetching latest SHA...');
+        const refetched = await fetchExistingFile(owner, repo, path, branch, token);
+        if (refetched.sha) {
+          body.sha = refetched.sha;
+        }
       }
 
       const errData = await response.json().catch(() => ({}));
@@ -136,6 +184,7 @@ async function commitFileToGitHub(owner, repo, path, branch, token, contentStr, 
     } catch (err) {
       lastError = err;
       if (attempt < maxRetries) {
+        console.log(`[LeetSync] Retrying GitHub commit (attempt ${attempt + 1}/${maxRetries})...`);
         await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
       }
     }
@@ -179,7 +228,6 @@ async function handleSyncSubmission(data) {
   );
 
   // 4. Check for duplicate or existing file on GitHub
-  console.log(`[LeetSync] Checking existing file on GitHub: ${repoFilePath}`);
   const existing = await fetchExistingFile(
     config.repoOwner,
     config.repoName,
@@ -227,8 +275,6 @@ async function handleSyncSubmission(data) {
     existing.sha
   );
 
-  console.log(`[LeetSync] GitHub commit complete (SHA: ${commitResult?.commit?.sha || 'ok'})`);
-
   await addSyncRecord({
     problemNumber: data.problemNumber,
     title: data.title,
@@ -267,7 +313,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     fetch(`https://api.github.com/repos/${owner}/${repo}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Accept': 'application/vnd.github.v3+json'
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
       }
     })
       .then(async res => {
