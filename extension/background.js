@@ -5,6 +5,8 @@
 
 importScripts('categorizer.js', 'formatter.js');
 
+console.log('[LeetSync] Service worker initialized');
+
 const DEFAULT_CONFIG = {
   githubToken: '',
   repoOwner: 'nvsinha114-svg',
@@ -146,6 +148,7 @@ async function commitFileToGitHub(owner, repo, path, branch, token, contentStr, 
  * Primary sync handler
  */
 async function handleSyncSubmission(data) {
+  console.log(`[LeetSync] Processing submission: #${data.problemNumber} ${data.title}`);
   const config = await getConfig();
 
   if (!config.githubToken) {
@@ -157,10 +160,12 @@ async function handleSyncSubmission(data) {
 
   // 1. Categorize
   const categoryFolder = categorizeProblem(data.topicTags, data.title);
+  console.log(`[LeetSync] Categorized into folder: ${categoryFolder}`);
   
   // 2. Generate filename
   const filename = getJavaFilename(data.title);
   const repoFilePath = `${categoryFolder}/${filename}`;
+  console.log(`[LeetSync] Target path: ${repoFilePath}`);
 
   // 3. Format source code with standard metadata header
   const formattedCode = formatSolutionFile(
@@ -174,6 +179,7 @@ async function handleSyncSubmission(data) {
   );
 
   // 4. Check for duplicate or existing file on GitHub
+  console.log(`[LeetSync] Checking existing file on GitHub: ${repoFilePath}`);
   const existing = await fetchExistingFile(
     config.repoOwner,
     config.repoName,
@@ -183,12 +189,11 @@ async function handleSyncSubmission(data) {
   );
 
   if (existing.exists) {
-    // Compare content normalized for whitespace/newlines
     const normalizedExisting = (existing.content || '').replace(/\r\n/g, '\n').trim();
     const normalizedNew = formattedCode.replace(/\r\n/g, '\n').trim();
 
     if (normalizedExisting === normalizedNew) {
-      console.log(`[LeetSync Pro] Duplicate submission detected for ${repoFilePath}. Exact match found, skipping commit.`);
+      console.log(`[LeetSync] Duplicate submission detected for ${repoFilePath}. Skipping commit.`);
       await addSyncRecord({
         problemNumber: data.problemNumber,
         title: data.title,
@@ -208,6 +213,7 @@ async function handleSyncSubmission(data) {
 
   // 5. Build standard commit message
   const commitMessage = buildCommitMessage(data.problemNumber, data.title, existing.exists);
+  console.log(`[LeetSync] Prepared commit message: "${commitMessage}"`);
 
   // 6. Commit to GitHub
   const commitResult = await commitFileToGitHub(
@@ -220,6 +226,8 @@ async function handleSyncSubmission(data) {
     commitMessage,
     existing.sha
   );
+
+  console.log(`[LeetSync] GitHub commit complete (SHA: ${commitResult?.commit?.sha || 'ok'})`);
 
   await addSyncRecord({
     problemNumber: data.problemNumber,
@@ -248,10 +256,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     handleSyncSubmission(request.data)
       .then(res => sendResponse(res))
       .catch(err => {
-        console.error('[LeetSync Pro] Background sync error:', err);
+        console.error('[LeetSync] Background sync error:', err.message);
         sendResponse({ success: false, error: err.message });
       });
-    return true; // Keep channel open for async response
+    return true; // Keep message channel open for async sendResponse
   }
 
   if (request.action === 'TEST_GITHUB_CONNECTION') {
@@ -282,6 +290,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       .catch(err => {
         sendResponse({ success: false, error: err.message });
       });
-    return true;
+    return true; // Keep message channel open
   }
 });

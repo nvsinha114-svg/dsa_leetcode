@@ -19,11 +19,21 @@
         "*://leetcode.com/problems/*"
       ],
       "js": [
+        "interceptor.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "*://leetcode.com/problems/*"
+      ],
+      "js": [
         "categorizer.js",
         "formatter.js",
         "content.js"
       ],
-      "run_at": "document_end"
+      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [

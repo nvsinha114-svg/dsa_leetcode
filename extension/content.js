@@ -1,35 +1,48 @@
 /**
  * Content Script for LeetCode
- * Coordinates between page interceptor, DOM observers, LeetCode GraphQL API, UI notification toast, and background service worker.
+ * Runs in isolated world. Receives events from main-world interceptor, fetches GraphQL metadata/code,
+ * applies categorization/formatting, and communicates with background service worker.
  */
 
 (function () {
   'use strict';
 
-  // Inject interceptor into main page context
-  function injectInterceptor() {
+  console.log('[LeetSync] Content script loaded');
+
+  // Fallback injection for browsers that do not support world: "MAIN" in manifest
+  function injectFallbackInterceptor() {
     try {
+      if (document.getElementById('leetsync-injected-script')) return;
       const script = document.createElement('script');
+      script.id = 'leetsync-injected-script';
       script.src = chrome.runtime.getURL('interceptor.js');
       script.onload = function () {
         this.remove();
       };
       (document.head || document.documentElement).appendChild(script);
     } catch (e) {
-      console.warn('[LeetSync Pro] Failed to inject interceptor script:', e);
+      console.warn('[LeetSync] Fallback script injection warning:', e);
     }
   }
 
-  injectInterceptor();
+  injectFallbackInterceptor();
 
-  // Listen for messages from injected page interceptor
-  window.addEventListener('message', async (event) => {
+  // Listen via CustomEvent on document (Primary bridge from MAIN world)
+  document.addEventListener('LEETSYNC_SUBMISSION_ACCEPTED', (event) => {
+    if (event && event.detail) {
+      console.log('[LeetSync] Event received via CustomEvent bridge');
+      handleAcceptedSubmission(event.detail);
+    }
+  });
+
+  // Listen via window.postMessage (Secondary bridge)
+  window.addEventListener('message', (event) => {
     if (event.source !== window || !event.data || event.data.source !== 'LEETSYNC_PAGE') {
       return;
     }
 
     if (event.data.type === 'LEETSYNC_SUBMISSION_ACCEPTED') {
-      console.log('[LeetSync Pro] Received accepted submission notification:', event.data.payload);
+      console.log('[LeetSync] Event received via postMessage bridge');
       handleAcceptedSubmission(event.data.payload);
     }
   });
@@ -42,6 +55,7 @@
 
   // GraphQL query to fetch problem metadata
   async function fetchProblemMetadata(slug) {
+    console.log(`[LeetSync] Fetching metadata for ${slug}`);
     const query = `
       query questionData($titleSlug: String!) {
         question(titleSlug: $titleSlug) {
@@ -73,12 +87,12 @@
       const json = await res.json();
       return json?.data?.question || null;
     } catch (err) {
-      console.error('[LeetSync Pro] Error fetching problem metadata:', err);
+      console.error('[LeetSync] Error fetching problem metadata:', err);
       return null;
     }
   }
 
-  // GraphQL query to fetch submission code if not directly provided
+  // GraphQL query to fetch submission code
   async function fetchSubmissionCode(submissionId) {
     const query = `
       query submissionDetails($submissionId: Int!) {
@@ -113,7 +127,7 @@
       const json = await res.json();
       return json?.data?.submissionDetails?.code || null;
     } catch (err) {
-      console.warn('[LeetSync Pro] Failed to fetch submission details GraphQL:', err);
+      console.warn('[LeetSync] Failed to fetch submission details GraphQL:', err);
       return null;
     }
   }
@@ -180,7 +194,6 @@
     item.innerHTML = message;
     toast.appendChild(item);
 
-    // Animate in
     requestAnimationFrame(() => {
       item.style.opacity = '1';
       item.style.transform = 'translateY(0)';
@@ -197,16 +210,15 @@
     return item;
   }
 
-  // Handle the accepted submission flow
   let isSyncing = false;
   async function handleAcceptedSubmission(payload) {
     if (isSyncing) {
-      console.log('[LeetSync Pro] Sync already in progress, skipping redundant trigger');
+      console.log('[LeetSync] Sync already in progress, skipping redundant trigger');
       return;
     }
     isSyncing = true;
 
-    const toastItem = showToast('🚀 <b>LeetSync:</b> Accepted submission detected! Preparing sync to GitHub...', 'info', 0);
+    const toastItem = showToast('🚀 <b>LeetSync:</b> Accepted submission detected! Syncing to GitHub...', 'info', 0);
 
     try {
       const slug = payload.titleSlug || getProblemSlug();
@@ -233,6 +245,8 @@
         throw new Error('Unable to retrieve accepted Java solution source code.');
       }
 
+      console.log('[LeetSync] Sending solution to background');
+
       // Send to background service worker for GitHub sync
       chrome.runtime.sendMessage(
         {
@@ -252,25 +266,29 @@
           if (toastItem) toastItem.remove();
 
           if (chrome.runtime.lastError) {
+            console.error('[LeetSync] Runtime message error:', chrome.runtime.lastError.message);
             showToast(`❌ <b>LeetSync Error:</b> ${chrome.runtime.lastError.message}`, 'error');
             return;
           }
 
           if (response && response.success) {
             if (response.skippedDuplicate) {
+              console.log(`[LeetSync] GitHub sync skipped (duplicate): ${response.path}`);
               showToast(`ℹ️ <b>LeetSync:</b> <code>${response.path}</code> is already up-to-date on GitHub. (No duplicate commit)`, 'info', 7000);
             } else {
+              console.log(`[LeetSync] GitHub sync successful: ${response.path}`);
               showToast(`✅ <b>LeetSync:</b> Successfully synced <code>${response.path}</code> to GitHub!<br><span style="font-size:11px; opacity:0.8;">Commit: ${response.commitMessage}</span>`, 'success', 8000);
             }
           } else {
             const errorMsg = response?.error || 'Unknown error occurred during sync.';
+            console.error('[LeetSync] Sync failed:', errorMsg);
             showToast(`❌ <b>LeetSync Failed:</b> ${errorMsg}`, 'error', 9000);
           }
         }
       );
     } catch (err) {
       if (toastItem) toastItem.remove();
-      console.error('[LeetSync Pro] Sync error:', err);
+      console.error('[LeetSync] Sync error:', err);
       showToast(`❌ <b>LeetSync Error:</b> ${err.message}`, 'error', 9000);
     } finally {
       setTimeout(() => {
