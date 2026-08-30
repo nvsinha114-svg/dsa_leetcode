@@ -1,6 +1,6 @@
 /**
  * Content Script for LeetCode
- * Coordinates between page interceptor, LeetCode GraphQL API, UI notification toast, and background service worker.
+ * Coordinates between page interceptor, DOM observers, LeetCode GraphQL API, UI notification toast, and background service worker.
  */
 
 (function () {
@@ -10,7 +10,7 @@
   function injectInterceptor() {
     try {
       const script = document.createElement('script');
-      script.src = chrome.runtime.getURL('scripts/interceptor.js');
+      script.src = chrome.runtime.getURL('interceptor.js');
       script.onload = function () {
         this.remove();
       };
@@ -22,7 +22,7 @@
 
   injectInterceptor();
 
-  // Listen for messages from injected page script
+  // Listen for messages from injected page interceptor
   window.addEventListener('message', async (event) => {
     if (event.source !== window || !event.data || event.data.source !== 'LEETSYNC_PAGE') {
       return;

@@ -11,7 +11,7 @@
     "*://api.github.com/*"
   ],
   "background": {
-    "service_worker": "scripts/background.js"
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
@@ -19,9 +19,9 @@
         "*://leetcode.com/problems/*"
       ],
       "js": [
-        "scripts/categorizer.js",
-        "scripts/formatter.js",
-        "scripts/content.js"
+        "categorizer.js",
+        "formatter.js",
+        "content.js"
       ],
       "run_at": "document_end"
     }
@@ -29,7 +29,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "scripts/interceptor.js"
+        "interceptor.js"
       ],
       "matches": [
         "*://leetcode.com/*"

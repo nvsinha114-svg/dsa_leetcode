@@ -68,7 +68,7 @@
   function handleSubmissionCheck(data, url) {
     if (!data) return;
     
-    // Check if submission is finished
+    // Check if submission check is finished
     if (data.state === 'SUCCESS') {
       // Check if accepted: status_code 10 is Accepted, or status_msg === "Accepted"
       const isAccepted = data.status_code === 10 || data.status_msg === 'Accepted' || (data.status_display && data.status_display.toLowerCase() === 'accepted');
@@ -76,7 +76,6 @@
       if (isAccepted) {
         console.log('[LeetSync Pro] Accepted submission detected via Check API!', data);
         
-        // Extract submission ID from URL if not in data
         let submissionId = data.submission_id;
         if (!submissionId && url) {
           const match = url.match(/\/submissions\/detail\/(\d+)\/check/);
@@ -103,7 +102,6 @@
   function handleGraphQLSubmission(data) {
     if (!data || !data.data) return;
     
-    // submissionDetails
     const details = data.data.submissionDetails;
     if (details && (details.statusCode === 10 || (details.statusDisplay && details.statusDisplay.toLowerCase() === 'accepted'))) {
       console.log('[LeetSync Pro] Accepted submission detected via GraphQL!', details);

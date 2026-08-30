@@ -3,8 +3,8 @@
  */
 
 const assert = require('assert');
-const { categorizeProblem } = require('../extension/scripts/categorizer');
-const { toPascalCase, getJavaFilename, formatSolutionFile, buildCommitMessage } = require('../extension/scripts/formatter');
+const { categorizeProblem } = require('../extension/categorizer');
+const { toPascalCase, getJavaFilename, formatSolutionFile, buildCommitMessage } = require('../extension/formatter');
 
 console.log('Running LeetSync Pro Verification Tests...\n');
 
