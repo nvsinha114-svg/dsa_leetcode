@@ -8,7 +8,6 @@ Space Complexity: O(1)
 */
 
 for(int i=0;i<words.length;i++){
-        
 
         }
             String temp = words[i];
@@ -22,5 +21,7 @@ for(int i=0;i<words.length;i++){
 
         return sb.toString();
         StringBuilder sb = new StringBuilder();
+        String[] words = s.trim().split("\\s+");
+        
     }
 }
