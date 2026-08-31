@@ -18,7 +18,7 @@ for(int i=0;i<words.length;i++){
             }
                  sb.append(temp.charAt(j));
 
-            if(i!=0) sb.append(" ");
+            if(i!=words.length - 1) sb.append(" ");
 
         return sb.toString();
         StringBuilder sb = new StringBuilder();
