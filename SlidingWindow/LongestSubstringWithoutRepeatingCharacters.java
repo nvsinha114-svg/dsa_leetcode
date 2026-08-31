@@ -7,23 +7,18 @@ Time Complexity: O(n)
 Space Complexity: O(1)
 */
 
-for(int right =0;right<s.length();right++){
-
-             char ch = s.charAt(right);
+char ch = s.charAt(right);
 
              if(set.contains(ch)){
 
-             }
-                set.remove(ch);
+                set.remove(s.charAt(left));
                 left++;
-
+             }
+             set.add(ch);
              counter = Math.max(counter,left+right-1);
         }
 
-
-        HashSet<Character> set = new HashSet<>();
-
-        int left =0;
         return counter;
         
     }
+}
