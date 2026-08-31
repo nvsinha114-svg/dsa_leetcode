@@ -7,23 +7,21 @@ Time Complexity: O(n)
 Space Complexity: O(1)
 */
 
-//Sliding window
+}
+            freqp[p.charAt(i)- 'a']++;
 
-        for(int right=k ;right<s.length();right++){
-
-        if(Arrays.equals(freqp,freqs)) ans.add(0);
-
-        }
-            freqs[s.charAt(i)- 'a']++;
-        for(int i=0;i<k;i++){
-
+        for(int i=0 ;i<k;i++){
         }
 
-            freqs[s.charAt(right)-'a']++;
+        if (k > s.length()) {
+            return ans;
 
-            freqs[s.charAt(right-k)-'a']--;
+        int k= p.length();
+        List<Integer> ans = new ArrayList<>();
+ 
 
-            if(Arrays.equals(freqp,freqs)) ans.add(right-k+1);
-        }
+        int[] freqs = new int[26];
+        int[] freqp = new int[26];
 
-        return ans;
+    public List<Integer> findAnagrams(String s, String p) {
+class Solution {
