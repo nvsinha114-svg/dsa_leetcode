@@ -13,7 +13,7 @@ if (fast == null || fast.next == null) {
 
         slow = head;
 
-        if(slow!=head){
+        while(slow!=head){
 
             slow = slow.next;
             fast = fast.next;
