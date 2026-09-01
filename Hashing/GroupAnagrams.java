@@ -7,19 +7,28 @@ Time Complexity: O(n)
 Space Complexity: O(1)
 */
 
-for(char ch : word.toCharArray()){
+class Solution {
+    public List<List<String>> groupAnagrams(String[] strs) {
 
-              }
-                  freq[ch -'a']++;
+        HashMap<String,List<String>> map = new HashMap<>();
 
-            String key = Arrays.toString(freq);
+        for(String word : strs){
 
-            map.putIfAbsent(key,new ArrayList<>());
+             int[] freq = new int[26];
 
-            map.get(key).add(word);
-        }
-        
-    }
+              for(char ch : word.toCharArray()){
 
-        return new ArrayList<>(map.values());
+                  freq[ch -'a']++;
+              }
+
+            String key = Arrays.toString(freq);
+
+            map.putIfAbsent(key,new ArrayList<>());
+
+            map.get(key).add(word);
+        }
+
+        return new ArrayList<>(map.values());
+        
+    }
 }
