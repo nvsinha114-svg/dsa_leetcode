@@ -8,16 +8,22 @@ Space Complexity: O(1)
 */
 
 while(curr.next!=null){
+        ListNode curr = dummy;
 
-             if(curr.val == val) {
+        dummy.next = head;
+        ListNode dummy = new ListNode(0);
+
+    public ListNode removeElements(ListNode head, int val) {
+class Solution {
+ */
+ * }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode next;
+ *     ListNode() {}
+ *     int val;
+
+             if(curr.next.val == val) {
 
                  curr.next = curr.next.next;
              }
-
-             else curr = curr.next;
-        }
-
-        return dummy.next;
-        
-    }
-}
