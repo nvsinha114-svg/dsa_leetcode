@@ -12,7 +12,7 @@ ListNode first = prev.next;
 
             first.next = second.next;
             second.next = first;
-            first = second;
+            prev.next = second;
 
             prev = first;
         }
