@@ -7,22 +7,24 @@ Time Complexity: O(n)
 Space Complexity: O(1)
 */
 
-class Solution {
-    public boolean isPerfectSquare(int num) {
+class Solution {
+    public boolean isPerfectSquare(int num) {
 
-        int lb =0;
-        int rb = num/2;
+        int lb =1;
+        int rb = num;
 
-        while(lb<=rb){
-        
+        while(lb<=rb){
 
-        }
-            int mid = lb+(rb-lb)/2;
+            int mid = lb+(rb-lb)/2;
 
-            if(mid*mid == num) return true;
+            if((long)mid*mid == num) return true;
 
-            else if(mid*mid>num) rb = mid-1;
+            else if((long)mid*mid>num) rb = mid-1;
 
-            else lb = mid+1;
+            else lb = mid+1;
+        }
 
-        return false;
+        return false;
+        
+    }
+}
