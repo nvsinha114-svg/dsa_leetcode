@@ -7,22 +7,28 @@ Time Complexity: O(n)
 Space Complexity: O(1)
 */
 
-int mid = low+(high-low)/2;
+class Solution {
+    public char nextGreatestLetter(char[] letters, char target) {
 
-            if(letters[mid]>target){
+        int low = 0;
+        int high =letters.length-1;
 
-            }
-               ans = letters[mid];
-               high = mid-1;
+        char ans = letters[0];
 
-            else low = mid+1;
+        while(low<=high){
 
-        while(low<=high){
+            int mid = low+(high-low)/2;
 
-        char ans = letters[0];
+            if(letters[mid]>target){
 
-        int high =letters.length-1;
-        int low = 0;
+               ans = letters[mid];
+               high = mid-1;
+            }
 
-    public char nextGreatestLetter(char[] letters, char target) {
-        }
+            else low = mid+1;
+        }
+
+        return ans;
+        
+    }
+}
