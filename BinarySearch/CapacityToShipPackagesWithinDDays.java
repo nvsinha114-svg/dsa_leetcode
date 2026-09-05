@@ -7,20 +7,22 @@ Time Complexity: O(n)
 Space Complexity: O(1)
 */
 
-int sumweights = 0;
-             int requiredays  = 0;
-
-        while(low<=high){
-       
-
-        }
-            high+=weights[i];
-
-        int high = 0;
+int high = 0;
 
         for(int i=0;i<weights.length;i++){
 
+            high+=weights[i];
         }
-            low = Math.max(weights[i],low);
 
-        for(int i =0;i<weights.length;i++){
+       
+        while(low<=high){
+
+            low = Math.max(weights[i],low);
+        }
+
+
+             int requiredays  = 1;
+             int sumweights = 0;
+
+
+            int mid =low+(high-low)/2;
