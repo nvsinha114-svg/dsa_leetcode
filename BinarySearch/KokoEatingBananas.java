@@ -7,21 +7,32 @@ Time Complexity: O(n)
 Space Complexity: O(1)
 */
 
-for(int x : piles) {
-                hours += (x + mid - 1) / mid;
-            }
+class Solution {
+    public int minEatingSpeed(int[] piles, int h) {
 
-            int hours = 0;
-            int mid = low + (high - low) / 2;
+        int low = 1;
+        int high = 0;
 
-        while(low <= high) {
+        for(int x : piles) {
+            high = Math.max(high, x);
+        }
 
-        }
-            high = Math.max(high, x);
-        for(int x : piles) {
-            if(hours <= h) {
-                high = mid - 1;
-            } else {
-                low = mid + 1;
-            }
-        }
+        while(low <= high) {
+
+            int mid = low + (high - low) / 2;
+            long hours = 0;
+
+            for(int x : piles) {
+                hours += (x + mid - 1) / mid;
+            }
+
+            if(hours <= h) {
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+
+        return low;
+    }
+}
