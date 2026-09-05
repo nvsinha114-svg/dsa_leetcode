@@ -7,22 +7,33 @@ Time Complexity: O(n)
 Space Complexity: O(1)
 */
 
-int mid = low + (high-low)/2;
+class Solution {
+    public int smallestDivisor(int[] nums, int threshold) {
 
-            for(int i =0 ;i<nums.length;i++){
+        int low = 1;
+        int high = Integer.MIN_VALUE;
 
-                sum+=(nums[i]+mid-1)/mid;
-            int sum = 0;
+        for(int i = 0;i<nums.length;i++){
 
-        while(low<=high){
+            high = Math.max(nums[i],high);
+        }
 
-        }
-            high = Math.max(nums[i],high);
+        while(low<=high){
 
-        for(int i = 0;i<nums.length;i++){
+            int mid = low + (high-low)/2;
+            int sum = 0;
 
-        int high = Integer.MIN_VALUE;
-        int low = 1;
+            for(int i =0 ;i<nums.length;i++){
 
-    public int smallestDivisor(int[] nums, int threshold) {
-            }
+                sum+=(nums[i]+mid-1)/mid;
+            }
+
+            if(sum<=threshold) high = mid-1;
+
+            else low = mid+1;
+        }
+
+        return low;
+        
+    }
+}
