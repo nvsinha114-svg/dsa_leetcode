@@ -7,22 +7,50 @@ Time Complexity: O(n)
 Space Complexity: O(1)
 */
 
-int high = 0;
+class Solution {
+    public int shipWithinDays(int[] weights, int days) {
 
-        for(int i=0;i<weights.length;i++){
+        int low = Integer.MIN_VALUE;
 
-            high+=weights[i];
-        }
+        for(int i =0;i<weights.length;i++){
 
-       
-        while(low<=high){
+            low = Math.max(weights[i],low);
+        }
 
-            low = Math.max(weights[i],low);
-        }
+        int high = 0;
+
+        for(int i=0;i<weights.length;i++){
+
+            high+=weights[i];
+        }
+
+       
+        while(low<=high){
+
+             int requiredays  = 1;
+             int sumweights = 0;
 
 
-             int requiredays  = 1;
-             int sumweights = 0;
+            int mid =low+(high-low)/2;
+            
+            for(int i =0;i<weights.length;i++){
 
+                if(sumweights+weights[i] > mid){
 
-            int mid =low+(high-low)/2;
+                    requiredays++;
+                    sumweights = 0;
+                }
+
+                sumweights+=weights[i];
+            }
+
+            if(requiredays<=days) high = mid-1;
+
+            else low = mid+1;
+
+        }
+
+        return low;
+        
+    }
+}
