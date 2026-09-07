@@ -7,23 +7,22 @@ Time Complexity: O(n)
 Space Complexity: O(1)
 */
 
-ans = mid;
-            if(canMake(bloomDay,m , k , mid)){
+if(bloom <= day){
 
-            int mid =low+(high-low)/2;
+                flowers++;
 
-        while(low<=high){
+                if(flowers==k){
 
-        int ans =-1;
+                    bouquets++;
+                    flowers = 0;
+                }
+
+                if(bouquets == m) return true;
+              }
+              else flowers = 0;
 
         }
-            high = Math.max(bloom,high);
 
-        for(int bloom : bloomDay){
-
-        int high = Integer.MIN_VALUE;
-        int low = 1;
-                high = mid-1;
-            }
-            else low = mid+1;
-        }
+        return false;
+    }
+}
