@@ -7,18 +7,22 @@ Time Complexity: O(n)
 Space Complexity: O(1)
 */
 
-current.remove(current.size()-1);
+//lo
 
-        //mat lo
-
-        int next = index+1;
-        
-        while(next<nums.length && nums[index]==nums.length){
-            next++;
         }
+            return;
 
-        backtrack(nums,index+1,current,ans);
+            ans.add(new ArrayList<>(current));
 
+        if(index == nums.length){
     }
-}
-        //backtrack
+
+    public void backtrack(int[] nums, int index, List<Integer> current, List<List<Integer>> ans){
+        return ans;
+        
+
+        List<List<Integer>> ans = new ArrayList<>();
+        backtrack(nums,0,new ArrayList<>(),ans);
+
+    public List<List<Integer>> subsetsWithDup(int[] nums) {
+class Solution {
