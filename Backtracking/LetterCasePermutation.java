@@ -7,22 +7,22 @@ Time Complexity: O(n)
 Space Complexity: O(1)
 */
 
-public void backtrack(char[] chars, int index , List<String> ans){
+//digit
+        if(Character.isDigit(chars[index])){
+        return ans;
+        
+    }
+
+    public void backtrack(char[] chars, int index , List<String> ans){
 
         if(index == chars.length){
             ans.add(new String(chars));
-        }
             return;
+        }
+        backtrack(chars,index+1,ans);
+        }
 
-        //digit
-        if(Character.isDigit(chars[index])){
-
-    }
-        
-    public List<String> letterCasePermutation(String s) {
-class Solution {
-
-        List<String> ans = new ArrayList<>();
-
-        backtrack(s.toCharArray(),0,ans);
-        return ans;
+        //small letter
+        chars[index] = Character.toLowerCase(chars[index]);
+        backtrack(chars,index+1,ans);
+        return;
