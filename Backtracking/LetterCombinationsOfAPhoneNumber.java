@@ -7,23 +7,43 @@ Time Complexity: O(n)
 Space Complexity: O(1)
 */
 
-String letters = map[digit];
+class Solution {
+    public List<String> letterCombinations(String digits) {
 
-            for(int i=0;i<letters.length();i++){
+        List<String> ans = new ArrayList<>();
+        if(digits.length() == 0) { return ans; }
 
-            int digit = digits.charAt(index) -'0';
+        String[] map = {"","","abc","def","ghi","jkl","mno","pqrs","tuv","wxyz"};
 
-            }
-                return;
-                ans.add(current.toString());
+        backtrack(digits,0,new StringBuilder(),ans,map);
 
-            if(index == digits.length()){
-        
+        return ans;
+        
+    }
 
-                          List<String> ans, String[] map){
-               //LO
-               current.append(letters.charAt(i));
-               backtrack(digits,index+1,current,ans,map);
+    public void backtrack(String digits, int index, StringBuilder current,
+                          List<String> ans, String[] map){
 
-               //MAT LO
-               current.deleteCharAt(current.length()-1);
+        
+            if(index == digits.length()){
+
+                ans.add(current.toString());
+                return;
+            }
+
+            int digit = digits.charAt(index) -'0';
+
+            String letters = map[digit];
+
+            for(int i=0;i<letters.length();i++){
+
+               //LO
+               current.append(letters.charAt(i));
+               backtrack(digits,index+1,current,ans,map);
+
+               //MAT LO
+               current.deleteCharAt(current.length()-1);
+            }
+
+    }
+}
