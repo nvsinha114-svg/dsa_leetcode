@@ -1,26 +1,43 @@
-/*
-LeetCode #47
-Problem: Permutations II
-Difficulty: Medium
-URL: https://leetcode.com/problems/permutations-ii/
-Time Complexity: O(n)
-Space Complexity: O(1)
-*/
+class Solution {
+    public List<List<Integer>> permuteUnique(int[] nums) {
 
-List<List<Integer>> ans){
-                          List<Integer> current,
-    public void backtrack(int[] nums,boolean[] used,
+        List<List<Integer>> ans = new ArrayList<>();
 
-    }
-        
-        return ans;
+        Arrays.sort(nums);
+        boolean[] used = new boolean[nums.length];
+
+        backtrack(nums,used,new ArrayList<>(),ans);
+
+        return ans;
+        
+    }
+
+    public void backtrack(int[] nums,boolean[] used,
+                          List<Integer> current,
+                          List<List<Integer>> ans){
 
 
-        backtrack(nums,used,new ArrayList<>(),ans);
-        boolean[] used = new boolean[nums.length];
-        Arrays.sort(nums);
+            if(current.size() == nums.length){
+                ans.add(new ArrayList<>(current));
+                return;
+            }
 
-        List<List<Integer>> ans = new ArrayList<>();
+            for(int i=0;i<nums.length;i++){
 
-    public List<List<Integer>> permuteUnique(int[] nums) {
-class Solution {
+                if(used[i]) continue;
+
+                if(i>0 && nums[i]==nums[i-1] && !used[i-1]) continue;
+
+                //LO
+                used[i] = true;
+                current.add(nums[i]);
+                backtrack(nums,used,current,ans);
+
+
+                //MAT LO
+                current.remove(current.size()-1);
+                used[i] = false;
+            }
+
+    }
+}
