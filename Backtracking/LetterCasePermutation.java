@@ -1,28 +1,32 @@
-/*
-LeetCode #784
-Problem: Letter Case Permutation
-Difficulty: Medium
-URL: https://leetcode.com/problems/letter-case-permutation/
-Time Complexity: O(n)
-Space Complexity: O(1)
-*/
+class Solution {
+    public List<String> letterCasePermutation(String s) {
 
-//digit
-        if(Character.isDigit(chars[index])){
-        return ans;
-        
-    }
+        List<String> ans = new ArrayList<>();
 
-    public void backtrack(char[] chars, int index , List<String> ans){
+        backtrack(s.toCharArray(),0,ans);
+        return ans;
+        
+    }
 
-        if(index == chars.length){
-            ans.add(new String(chars));
-            return;
-        }
-        backtrack(chars,index+1,ans);
-        }
+    public void backtrack(char[] chars, int index , List<String> ans){
 
-        //small letter
-        chars[index] = Character.toLowerCase(chars[index]);
-        backtrack(chars,index+1,ans);
-        return;
+        if(index == chars.length){
+            ans.add(new String(chars));
+            return;
+        }
+
+        //digit
+        if(Character.isDigit(chars[index])){
+        backtrack(chars,index+1,ans);
+        return;
+        }
+
+        //small letter
+        chars[index] = Character.toLowerCase(chars[index]);
+        backtrack(chars,index+1,ans);
+
+        //capital letter
+        chars[index] = Character.toUpperCase(chars[index]);
+        backtrack(chars,index+1,ans);
+    }
+}
