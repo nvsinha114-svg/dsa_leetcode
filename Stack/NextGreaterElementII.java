@@ -10,26 +10,26 @@ Space Complexity: O(1)
 class Solution {
     public int[] nextGreaterElements(int[] nums) {
 
-        int[] res = new int[nums.length];
+        int n = nums.length;
+        int[] ans = new int[n];
 
-        for(int i =0;i<nums.length;i++){
+        Arrays.fill(ans, -1);
 
-            res[i] = -1;
+        Stack<Integer> st = new Stack<>();
 
-            for(int j =1;j<nums.length;j++){
+        for (int i = 0; i < 2 * n; i++) {
 
-                int nextindex = (i+j)%nums.length;
+            int index = i % n;
 
-                if(nums[i]<nums[nextindex]){
+            while (!st.isEmpty() && nums[st.peek()] < nums[index]) {
+                ans[st.pop()] = nums[index];
+            }
 
-                    res[i] = nums[nextindex];
-                    break;
-                }
-
+            if (i < n) {
+                st.push(index);
             }
         }
 
-        return res;
-        
+        return ans;
     }
 }
